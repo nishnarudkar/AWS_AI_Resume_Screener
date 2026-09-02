@@ -1,16 +1,16 @@
-# ☁️ aws-ai-resume-screener: AWS AI Resume Screener & Talent Acquisition Pipeline
+# aws-ai-resume-screener: AWS AI Resume Screener & Talent Acquisition Pipeline
 
-An intelligent, serverless recruitment pipeline built on **Amazon Web Services (AWS)** that automatically processes resumes, extracts meaningful candidate information using **Amazon Textract and Amazon Comprehend**, matches candidates against job descriptions, ranks candidates using an explainable scoring model, and provides recruiters with an authenticated dashboard for candidate management.
+An intelligent, serverless recruitment pipeline built on Amazon Web Services (AWS) that automatically processes resumes, extracts meaningful candidate information using Amazon Textract and Amazon Comprehend, matches candidates against job descriptions, ranks candidates using an explainable scoring model, and provides recruiters with an authenticated dashboard for candidate management.
 
 The system is designed to reduce manual resume screening effort while maintaining an auditable and reliable recruitment workflow.
 
 ---
 
-## 🚀 Project Overview
+## Project Overview
 
 Recruiters often need to manually review large numbers of resumes for a single job opening. This process can be time-consuming, inconsistent, and difficult to scale.
 
-This project addresses the problem by building an **AI-powered resume screening pipeline** using AWS serverless services.
+This project addresses the problem by building an AI-powered resume screening pipeline using AWS serverless services.
 
 The system:
 
@@ -31,7 +31,7 @@ The system:
 
 ---
 
-## 🎯 Objectives
+## Objectives
 
 1. Automate resume ingestion and parsing.
 2. Extract meaningful information from unstructured resumes.
@@ -48,7 +48,7 @@ The system:
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```text
                          ┌──────────────────────┐
@@ -130,7 +130,7 @@ The system:
          Recruiter Dashboard
 ```
 
-### ☁️ AWS Services Used
+### AWS Services Used
 
 | AWS Service | Purpose |
 | :--- | :--- |
@@ -149,7 +149,7 @@ The system:
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 aws-ai-resume-screener/
@@ -190,7 +190,7 @@ aws-ai-resume-screener/
 
 ---
 
-## 🔄 End-to-End Workflow
+## End-to-End Workflow
 
 ### 1. Resume Upload
 The recruiter uploads one or more resumes (PDF / DOCX) through the recruitment dashboard into Amazon S3.
@@ -240,7 +240,7 @@ Amazon SQS buffers concurrent resume uploads, and an SQS DLQ captures poison/fai
 
 ---
 
-## 👥 Team Responsibilities
+## Team Responsibilities
 
 | Member | Responsibility | Focus Files / Modules |
 | :--- | :--- | :--- |
@@ -251,7 +251,7 @@ Amazon SQS buffers concurrent resume uploads, and an SQS DLQ captures poison/fai
 
 ---
 
-## 🧪 Testing & Reliability
+## Testing & Reliability
 
 - **Unit & Integration Tests**: Test PDF/DOCX ingestion, skill normalization, entity confidence filtering, and scoring math.
 - **DLQ Test**: Upload invalid files to ensure failed messages route to DLQ and write audit records into `FailedJobs`.
@@ -259,7 +259,7 @@ Amazon SQS buffers concurrent resume uploads, and an SQS DLQ captures poison/fai
 
 ---
 
-## 🧹 Cost Considerations & Cleanup
+## Cost Considerations & Cleanup
 
 During development:
 - Use small test documents and minimal sample resumes.
@@ -269,6 +269,6 @@ During development:
 
 ---
 
-## 📜 License
+## License
 
 This project is developed for educational and demonstration purposes.
