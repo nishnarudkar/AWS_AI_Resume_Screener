@@ -17,7 +17,6 @@ An end-to-end, enterprise-grade serverless recruitment pipeline built on Amazon 
 1. [Executive Summary & Problem Statement](#executive-summary--problem-statement)
 2. [Key Capabilities & Business Value](#key-capabilities--business-value)
 3. [System Architecture](#system-architecture)
-   - [Interactive Mermaid Architecture Diagram](#interactive-mermaid-architecture-diagram)
    - [ASCII Component Interaction Diagram](#ascii-component-interaction-diagram)
 4. [AWS Services & System Design Rationale](#aws-services--system-design-rationale)
 5. [End-to-End Processing Workflow](#end-to-end-processing-workflow)
@@ -63,80 +62,6 @@ This project addresses these challenges by delivering an **auditable, scalable, 
 ## System Architecture
 
 ![AWS AI Resume Screener Architecture Diagram](./AI_Resume_Screener_architecture_diagram.png)
-
-### Interactive Mermaid Architecture Diagram
-
-```mermaid
-flowchart TB
-    subgraph Client["Recruiter Frontend"]
-        UI["Recruiter Dashboard\n(S3 / CloudFront Static Hosting)"]
-        Cognito["Amazon Cognito\n(User Pool Auth)"]
-    end
-
-    subgraph API_Layer["API & Security Layer"]
-        APIGW["Amazon API Gateway\n(Cognito Authorizer)"]
-        LambdaAPI["Backend API Lambdas\n(candidate_api, job_api, shortlist_api, csv_export)"]
-    end
-
-    subgraph Ingestion["Ingestion & Buffer"]
-        S3["Amazon S3 Bucket\nresumes/ | jobs/ | converted/ | parsed/"]
-        SQS["Amazon SQS\n(resume-processing-queue)"]
-        DLQ["Amazon SQS DLQ\n(resume-processing-dlq)"]
-    end
-
-    subgraph Processing["AI Parsing Engine"]
-        ParseLambda["parse_resume Lambda"]
-        DocConverter["DOCX → PDF Converter\n(Lambda Layer / Container)"]
-        Textract["Amazon Textract\n(DetectDocumentText)"]
-        ComprehendStd["Amazon Comprehend\n(Standard Entities: PERSON, ORG, DATE, TITLE)"]
-        ComprehendCustom["Amazon Comprehend\n(Custom SKILL Recognizer)"]
-    end
-
-    subgraph Scoring["Matching & Scoring Engine"]
-        ScoreLambda["score_candidate Lambda"]
-    end
-
-    subgraph Persistence["Storage & Communication"]
-        DDB_Candidates[("DynamoDB\nCandidates Table")]
-        DDB_Jobs[("DynamoDB\nJobs Table")]
-        DDB_Failed[("DynamoDB\nFailedJobs Table")]
-        SES["Amazon SES\n(Interview Email Notification)"]
-    end
-
-    %% Flow Connections
-    UI -->|1. Authenticate| Cognito
-    Cognito -->|Token| UI
-    UI -->|2. Direct Upload Resumes / JDs| S3
-    UI -->|3. REST API Requests| APIGW
-    APIGW --> LambdaAPI
-    LambdaAPI --> DDB_Candidates
-    LambdaAPI --> DDB_Jobs
-    LambdaAPI --> DDB_Failed
-    LambdaAPI -->|Shortlist Action| SES
-
-    S3 -->|4. S3 Object Created Event| SQS
-    SQS -->|5. Trigger Batch| ParseLambda
-    ParseLambda -->|If DOCX| DocConverter
-    DocConverter -->|Converted PDF| S3
-    ParseLambda -->|6. Extract Raw Text| Textract
-    Textract -->|7. OCR Text| ComprehendStd
-    Textract -->|7. OCR Text| ComprehendCustom
-    ComprehendStd -->|Standard Entities| ParseLambda
-    ComprehendCustom -->|SKILL Entities| ParseLambda
-    ParseLambda -->|8. Store Candidate Record| DDB_Candidates
-
-    DDB_Candidates -->|9. Trigger Match| ScoreLambda
-    DDB_Jobs -->|Fetch JD Entities| ScoreLambda
-    ScoreLambda -->|10. Write 50/30/20 Match Score| DDB_Candidates
-
-    SQS -.->|Repeated Failure (maxReceiveCount >= 5)| DLQ
-    DLQ -->|11. DLQ Error Handler| DDB_Failed
-
-    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:#fff;
-    classDef client fill:#232F3E,stroke:#FF9900,stroke-width:2px,color:#fff;
-    class APIGW,S3,SQS,DLQ,ParseLambda,DocConverter,Textract,ComprehendStd,ComprehendCustom,ScoreLambda,DDB_Candidates,DDB_Jobs,DDB_Failed,SES,LambdaAPI aws;
-    class UI,Cognito client;
-```
 
 ---
 
