@@ -12,34 +12,34 @@ An end-to-end, enterprise-grade serverless recruitment pipeline built on Amazon 
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-1. [Executive Summary & Problem Statement](#-executive-summary--problem-statement)
-2. [Key Capabilities & Business Value](#-key-capabilities--business-value)
-3. [System Architecture](#-system-architecture)
+1. [Executive Summary & Problem Statement](#executive-summary--problem-statement)
+2. [Key Capabilities & Business Value](#key-capabilities--business-value)
+3. [System Architecture](#system-architecture)
    - [Interactive Mermaid Architecture Diagram](#interactive-mermaid-architecture-diagram)
    - [ASCII Component Interaction Diagram](#ascii-component-interaction-diagram)
-4. [AWS Services & System Design Rationale](#-aws-services--system-design-rationale)
-5. [End-to-End Processing Workflow](#-end-to-end-processing-workflow)
+4. [AWS Services & System Design Rationale](#aws-services--system-design-rationale)
+5. [End-to-End Processing Workflow](#end-to-end-processing-workflow)
    - [1. Ingestion & DOCX Normalization](#1-ingestion--docx-normalization)
    - [2. Text Extraction via Amazon Textract](#2-text-extraction-via-amazon-textract)
    - [3. Dual-Pass NLP Entity Extraction](#3-dual-pass-nlp-entity-extraction)
    - [4. Skill Normalization & Experience Parsing](#4-skill-normalization--experience-parsing)
-6. [Explainable Scoring & Ranking Engine](#-explainable-scoring--ranking-engine)
-7. [Database Schemas (Amazon DynamoDB)](#-database-schemas-amazon-dynamodb)
-8. [Asynchronous Queuing & Resilience (SQS + DLQ)](#-asynchronous-queuing--resilience-sqs--dlq)
-9. [REST API Specification & Security](#-rest-api-specification--security)
-10. [Repository Structure](#-repository-structure)
-11. [Team Responsibilities & Work Breakdown](#-team-responsibilities--work-breakdown)
-12. [Testing Matrix & Quality Assurance](#-testing-matrix--quality-assurance)
-13. [IAM Security & Auditability Checklist](#-iam-security--auditability-checklist)
-14. [Cost Optimization & Resource Cleanup](#-cost-optimization--resource-cleanup)
-15. [Future Roadmap & Enhancements](#-future-roadmap--enhancements)
-16. [References & AWS Documentation](#-references--aws-documentation)
+6. [Explainable Scoring & Ranking Engine](#explainable-scoring--ranking-engine)
+7. [Database Schemas (Amazon DynamoDB)](#database-schemas-amazon-dynamodb)
+8. [Asynchronous Queuing & Resilience (SQS + DLQ)](#asynchronous-queuing--resilience-sqs--dlq)
+9. [REST API Specification & Security](#rest-api-specification--security)
+10. [Repository Structure](#repository-structure)
+11. [Team Responsibilities & Work Breakdown](#team-responsibilities--work-breakdown)
+12. [Testing Matrix & Quality Assurance](#testing-matrix--quality-assurance)
+13. [IAM Security & Auditability Checklist](#iam-security--auditability-checklist)
+14. [Cost Optimization & Resource Cleanup](#cost-optimization--resource-cleanup)
+15. [Future Roadmap & Enhancements](#future-roadmap--enhancements)
+16. [References & AWS Documentation](#references--aws-documentation)
 
 ---
 
-## 🎯 Executive Summary & Problem Statement
+## Executive Summary & Problem Statement
 
 Talent acquisition teams manually process hundreds of resumes per job opening. Traditional screening workflows suffer from three primary bottlenecks:
 * **Time Inefficiency**: Hours spent manually reading non-standardized PDF and DOCX files.
@@ -50,7 +50,7 @@ This project addresses these challenges by delivering an **auditable, scalable, 
 
 ---
 
-## ✨ Key Capabilities & Business Value
+## Key Capabilities & Business Value
 
 * **Multi-Format Resume Support**: Native processing for PDF files and automated LibreOffice/Headless conversion for DOCX documents prior to OCR.
 * **Custom Machine Learning Entity Extraction**: Combines Amazon Comprehend standard model (`PERSON`, `ORGANIZATION`, `DATE`, `TITLE`) with a **Custom Entity Recognizer** trained specifically to identify `SKILL` entities in technical resumes.
@@ -60,7 +60,7 @@ This project addresses these challenges by delivering an **auditable, scalable, 
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ![AWS AI Resume Screener Architecture Diagram](./AI_Resume_Screener_architecture_diagram.png)
 
@@ -208,12 +208,12 @@ PDF Resume   DOCX Resume
                         Final Candidate Score
                                  │
                                  ▼
-                       Recruiter Dashboard UI
+                        Recruiter Dashboard UI
 ```
 
 ---
 
-## 🛠️ AWS Services & System Design Rationale
+## AWS Services & System Design Rationale
 
 | AWS Service | Core Purpose | System Design Rationale |
 | :--- | :--- | :--- |
@@ -232,7 +232,7 @@ PDF Resume   DOCX Resume
 
 ---
 
-## 🔄 End-to-End Processing Workflow
+## End-to-End Processing Workflow
 
 ```mermaid
 sequenceDiagram
@@ -320,7 +320,7 @@ Text extracted by Textract is evaluated through a dual NLP pipeline using Amazon
 
 ---
 
-## 📊 Explainable Scoring & Ranking Engine
+## Explainable Scoring & Ranking Engine
 
 Rather than relying on non-transparent black-box scoring models, the candidate matching engine uses an auditable, weighted multi-factor formula:
 
@@ -334,12 +334,12 @@ $$\text{Final Score} = (\text{SkillScore} \times 0.50) + (\text{TitleScore} \tim
 | **Title Alignment** | **30%** | Exact Match = `100%`<br>Related Role = `75%`<br>No Alignment = `0%` | Matches extracted candidate job titles against required target job titles. |
 | **Experience Duration**| **20%** | $\min\left( \frac{\text{Candidate Experience Years}}{\text{Required JD Experience Years}}, 1.0 \right) \times 100$ | Compares total years of experience against JD requirements, capped at 100%. |
 
-> [!TIP]
+> [!NOTE]
 > **Configurable Threshold**: Candidates achieving a **FinalScore $\ge$ 70%** (configurable via the `SHORTLIST_THRESHOLD` environment variable) are flagged for automatic shortlisting recommendation.
 
 ---
 
-## 💾 Database Schemas (Amazon DynamoDB)
+## Database Schemas (Amazon DynamoDB)
 
 ### 1. `Candidates` Table
 * **Partition Key (PK)**: `JOB#{jobId}`
@@ -415,7 +415,7 @@ $$\text{Final Score} = (\text{SkillScore} \times 0.50) + (\text{TitleScore} \tim
 
 ---
 
-## ⚡ Asynchronous Queuing & Resilience (SQS + DLQ)
+## Asynchronous Queuing & Resilience (SQS + DLQ)
 
 To handle unexpected spikes in resume submission volume without breaching API limits or Lambda execution timeouts, the system incorporates an **Amazon SQS message queue with a Dead Letter Queue (DLQ)** redrive mechanism:
 
@@ -438,7 +438,7 @@ To handle unexpected spikes in resume submission volume without breaching API li
 
 ---
 
-## 🌐 REST API Specification & Security
+## REST API Specification & Security
 
 All backend API endpoints are exposed via **Amazon API Gateway** and secured using an **Amazon Cognito User Pool Authorizer**. Clients must include a valid HTTP Authorization Header:
 `Authorization: Bearer <Cognito_JWT_ID_Token>`
@@ -458,7 +458,7 @@ All backend API endpoints are exposed via **Amazon API Gateway** and secured usi
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 aws-ai-resume-screener/
@@ -497,7 +497,7 @@ aws-ai-resume-screener/
 
 ---
 
-## 👥 Team Responsibilities & Work Breakdown
+## Team Responsibilities & Work Breakdown
 
 | Team Member | Module Ownership | Key Focus Files & Infrastructure | Primary Deliverables |
 | :--- | :--- | :--- | :--- |
@@ -508,7 +508,7 @@ aws-ai-resume-screener/
 
 ---
 
-## 🧪 Testing Matrix & Quality Assurance
+## Testing Matrix & Quality Assurance
 
 | Test ID | Test Scenario | Execution Vector | Expected Verification Result |
 | :---: | :--- | :--- | :--- |
@@ -524,7 +524,7 @@ aws-ai-resume-screener/
 
 ---
 
-## 🔒 IAM Security & Auditability Checklist
+## IAM Security & Auditability Checklist
 
 ### Mandatory Least-Privilege IAM Policies
 
@@ -549,7 +549,7 @@ aws-ai-resume-screener/
 
 ---
 
-## 💰 Cost Optimization & Resource Cleanup
+## Cost Optimization & Resource Cleanup
 
 To maintain low operational costs during development:
 1. **CloudWatch Log Retention**: Restrict CloudWatch log group retention to **7 days**.
@@ -564,7 +564,7 @@ To maintain low operational costs during development:
 
 ---
 
-## 🚀 Future Roadmap & Enhancements
+## Future Roadmap & Enhancements
 
 * **Semantic Embedding Match**: Integrate **Amazon Bedrock** (Titan Text Embeddings) to evaluate contextual similarity beyond exact entity matching.
 * **Cover Letter Sentiment Analysis**: Incorporate Amazon Comprehend Sentiment Analysis as an auxiliary non-scoring candidate insight.
@@ -572,7 +572,7 @@ To maintain low operational costs during development:
 
 ---
 
-## 📚 References & AWS Documentation
+## References & AWS Documentation
 
 * [Amazon Textract DetectDocumentText API Reference](https://docs.aws.amazon.com/textract/latest/APIReference/API_DetectDocumentText.html)
 * [Amazon Comprehend Custom Entity Recognition Guide](https://docs.aws.amazon.com/comprehend/latest/dg/custom-entity-recognition.html)
@@ -582,6 +582,6 @@ To maintain low operational costs during development:
 
 ---
 
-<p center="align">
-  <i>Developed for Enterprise AI Talent Acquisition Demonstrations. Built on AWS Serverless Architecture.</i>
+<p align="center">
+  Developed for Enterprise AI Talent Acquisition Demonstrations. Built on AWS Serverless Architecture.
 </p>
